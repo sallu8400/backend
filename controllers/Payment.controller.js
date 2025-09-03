@@ -1,8 +1,8 @@
 const Cart = require("../models/Cart");
 const OrderModel = require("../models/Order");
 const crypto = require('crypto');
+const { nanoid } = require('nanoid');
 
-const { nanoid } = require('nanoid'); // <-- STEP 1: NANOID KO IMPORT KAREIN
 const  Razorpay =require ('razorpay');
 
 var instance = new Razorpay({
