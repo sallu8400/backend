@@ -178,6 +178,49 @@ exports.getProducts = async (req, res) => {
 };
 
 
+/**
+ * @desc    Search for products
+ * @route   GET /api/products/search
+ * @access  Public
+ */
+exports.searchProducts = async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    if (!search) {
+      return res.status(400).json({
+        success: false,
+        message: 'Search query is required',
+      });
+    }
+
+    // केवल टेक्स्ट सर्च के लिए क्वेरी बनाएं
+    const query = {
+      isActive: true,
+      $text: { $search: search }
+    };
+
+    console.log("Search Query:", query);
+
+    const products = await Product.find(query);
+    const total = await Product.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      total,
+      data: products,
+    });
+
+  } catch (error) {
+    console.error('Search products error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while searching for products',
+    });
+  }
+};
+
 // Get single product
 exports.getProduct = async (req, res) => {
   try {
@@ -205,6 +248,11 @@ exports.getProduct = async (req, res) => {
     });
   }
 };
+/**
+ * @desc    Search for products
+ * @route   GET /api/products/search
+ * @access  Public
+ */
 
 // Create product (Admin only)
 exports.createProduct = async (req, res) => {
@@ -396,44 +444,45 @@ exports.getFeaturedProducts = async (req, res) => {
   }
 };
 
-// Search products
+/**
+ * @desc    Search for products
+ * @route   GET /api/products/search
+ * @access  Public
+ */
 exports.searchProducts = async (req, res) => {
   try {
-    const { q } = req.query;
-    
-    if (!q) {
+    const { search } = req.query;
+
+    if (!search) {
       return res.status(400).json({
         success: false,
-        message: 'Search query is required'
+        message: 'Search query is required',
       });
     }
 
-    const products = await Product.find({
-      $and: [
-        { isActive: true },
-        {
-          $or: [
-            { name: { $regex: q, $options: 'i' } },
-            { description: { $regex: q, $options: 'i' } },
-            { brand: { $regex: q, $options: 'i' } },
-            { tags: { $in: [new RegExp(q, 'i')] } }
-          ]
-        }
-      ]
-    })
-    .populate('category', 'name slug')
-    .limit(20);
+    // केवल टेक्स्ट सर्च के लिए क्वेरी बनाएं
+    const query = {
+      isActive: true,
+      $text: { $search: search }
+    };
+
+    console.log("Search Query:", query);
+
+    const products = await Product.find(query);
+    const total = await Product.countDocuments(query);
 
     res.status(200).json({
       success: true,
       count: products.length,
-      data: products
+      total,
+      data: products,
     });
+
   } catch (error) {
     console.error('Search products error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while searching products'
+      message: 'Server error while searching for products',
     });
   }
 };

@@ -170,5 +170,5 @@ const productSchema = new mongoose.Schema({
   sku: { type: String, unique: true, required: true },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
-
+productSchema.index({ name: 'text', description: 'text', category: 'text' });
 module.exports = mongoose.model('Product', productSchema);

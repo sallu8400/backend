@@ -51,6 +51,7 @@ const reviewValidation = [
 
 // Public routes
 router.get('/', getProducts);
+
 router.get('/featured', getFeaturedProducts);
 router.get('/search', searchProducts);
 router.get('/:id', getProduct);
