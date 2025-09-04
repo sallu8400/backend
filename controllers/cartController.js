@@ -107,94 +107,86 @@ exports.addToCart = async (req, res) => {
 
 
 // Update cart item
-  exports.updateCartItem = async (req, res) => {
-    try {
-      const { itemId } = req.params;
-      const { quantity } = req.body;
-  console.log(req.user.id,itemId,quantity)
-      if (quantity < 1) {
-        return res.status(400).json({
-          success: false,
-          message: 'Quantity must be at least 1',
-        });
-      }
-
-      const cart = await Cart.findOne({ user: req.user.id });
-      if (!cart) {
-        return res.status(404).json({
-          success: false,
-          message: 'Cart not found',
-        });
-      }
-
-      // ✅ Reliable way to find item
-  const item = cart.items.find((i) => {
-    console.log("Item ID in DB:", i._id.toString());
-    console.log("Item ID in URL:", itemId);
-    return i._id.toString() === itemId;
-  });
-  console.log(item,"check")
-
-      if (!item) {
-        return res.status(404).json({
-          success: false,
-          message: 'Item not found in cart',
-        });
-      }
-
-      item.quantity = quantity;
-
-      // ✅ Recalculate totals
-      cart.totalItems = cart.items.reduce((sum, i) => sum + i.quantity, 0);
-      cart.totalAmount = cart.items.reduce((sum, i) => sum + i.quantity * i.price, 0);
-
-      await cart.save();
-      // await cart.populate('items.product', 'name price images isActive');
-
-      return res.status(200).json({
-        success: true,
-        message: 'Cart item updated',
-        data: cart,
-      });
-    } catch (error) {
-      console.error('Update cart item error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Server error while updating cart item',
-      });
-    }
-  };
-
-// Remove item from cart
-exports.removeFromCart = async (req, res) => {
+exports.updateCartItem = async (req, res) => {
   try {
     const { itemId } = req.params;
+    const { quantity } = req.body;
+
+    if (quantity < 1) {
+      return res.status(400).json({ message: 'Quantity must be at least 1' });
+    }
+
+    const cart = await Cart.findOne({ user: req.user.id });
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    const item = cart.items.find((i) => i._id.toString() === itemId);
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found in cart' });
+    }
+
+    item.quantity = quantity;
+
+    await cart.save(); // Save karne ke baad product sirf ID ban jaata hai
+
+    // ✅✅ YEH LINE SABSE ZAROORI HAI ✅✅
+    // Isse Mongoose ko bolte hain ki ab product ki ID ki jagah uski poori details daal do
+    await cart.populate('items.product', 'name price images isActive');
+
+    // Ab 'cart' mein product ki poori details hain
+    return res.status(200).json({
+      success: true,
+      message: 'Cart item updated',
+      data: cart,
+    });
+  } catch (error) {
+    console.error('Update cart item error:', error);
+    res.status(500).json({ message: 'Server error while updating cart item' });
+  }
+};
+
+// Remove item from cart
+// backend/controllers/cartController.js
+
+exports.removeFromCart = async (req, res) => {
+  try {
+    // 1. clarity के लिए इसका नाम itemId कर दें, क्योंकि यह कार्ट आइटम की आईडी है
+    const { itemId } = req.params; 
 
     const cart = await Cart.findOne({ user: req.user.id });
     if (!cart) {
       return res.status(404).json({
         success: false,
-        message: 'Cart not found'
+        message: "Cart not found"
       });
     }
 
-    cart.items.pull(itemId);
+    // ✅ यह सही तरीका है:
+    // cart.items में से उस item को हटाओ जिसकी अपनी `_id` भेजी गई `itemId` से मेल खाती है।
+    cart.items = cart.items.filter(
+      (item) => item._id.toString() !== itemId
+    );
+    
     await cart.save();
-    await cart.populate('items.product', 'name price images isActive');
+    
+    // अपडेटेड कार्ट को populate करके वापस भेजें
+    await cart.populate("items.product", "name price images isActive");
 
     res.status(200).json({
       success: true,
-      message: 'Item removed from cart',
+      message: "Item removed from cart",
       data: cart
     });
   } catch (error) {
-    console.error('Remove from cart error:', error);
+    console.error("Remove from cart error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while removing from cart'
+      message: "Server error while removing from cart"
     });
   }
 };
+
 
 // Clear cart
 exports.clearCart = async (req, res) => {
