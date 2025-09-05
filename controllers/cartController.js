@@ -199,7 +199,12 @@ exports.clearCart = async (req, res) => {
       });
     }
 
+    console.log(cart)
+
     cart.items = [];
+    cart.totalItems = 0;
+    cart.totalAmount = 0;
+    cart.totalQuantity = 0;
     await cart.save();
 
     res.status(200).json({
