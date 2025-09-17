@@ -137,6 +137,8 @@ exports.generateOrder = async (req, res) => {
   }
 };
 exports.paymentWebhook = async (req, res) => {
+console.log("Webhook endpoint hit");
+  console.log("Webhook payload received:", req.body);
   const event = req.body.event;
   const payment = req.body.payload.payment.entity;
 
