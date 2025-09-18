@@ -108,6 +108,7 @@ exports.generateOrder = async (req, res) => {
     const shipping = subtotal > 100 ? 0 : 15;
     const tax = subtotal * 0.08;
     const finalTotal = subtotal + shipping + tax;
+    
 
     // Step 5: Razorpay ke liye order options taiyar karein.
     // Amount hamesha 'paise' mein hona chahiye, isliye 100 se multiply karein.

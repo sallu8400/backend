@@ -347,7 +347,12 @@ exports.logout = async (req, res) => {
 
 
 
-exports.ForgetPassword = async (req, res) => { const user = await User.findOne({ email: req.body.email });
+exports.ForgetPassword = async (req, res) => {
+  
+  const user = await User.findOne({ email: req.body.email });
+
+  console.log(req.body);
+   console.log(user);
 
   if (!user) {
     return res.status(404).json({ message: "Email does not exist" });
