@@ -37,8 +37,8 @@ const SendEmail = async (sender, title, link, fullname) => {
     // ✅ यह स्पष्ट (explicit) कॉन्फ़िगरेशन हमेशा काम करता है
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',      // Gmail का SMTP सर्वर
-      port: 465,
-  secure: true,             // port 587 के लिए false होता है
+   port: 587,                 // <-- YEH BADLAAV KAREIN
+      secure: false,             // port 587 के लिए false होता है
       auth: {
         user: process.env.SMTP_EMAIL, // आपका पूरा ईमेल
         pass: process.env.SMTP_PASS,  // आपका 16-अक्षरों वाला App Password
